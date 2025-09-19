@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,7 +10,7 @@
     /* ------------------------
        Design system (CSS vars)
        ------------------------ */
-    :root{
+    :root {
       --bg: #0b1020;
       --card: #0f172a;
       --muted: #94a3b8;
@@ -19,10 +20,12 @@
       --danger: #ef4444;
       --ring: 0 0 0 3px rgba(37, 99, 235, .35);
       --radius: 14px;
-      --shadow: 0 10px 30px rgba(2, 6, 23, .55), 0 1px 0 rgba(255,255,255,.06) inset;
-      --glass: rgba(255,255,255,.06);
+      --shadow: 0 10px 30px rgba(2, 6, 23, .55), 0 1px 0 rgba(255, 255, 255, .06) inset;
+      --glass: rgba(255, 255, 255, .06);
     }
-    :root.light{ /* forced light mode if you add class="light" to <html> */
+
+    :root.light {
+      /* forced light mode if you add class="light" to <html> */
       --bg: #f6f7fb;
       --card: #ffffff;
       --muted: #475569;
@@ -31,145 +34,430 @@
       --accent-2: #16a34a;
       --danger: #dc2626;
       --ring: 0 0 0 3px rgba(37, 99, 235, .18);
-      --glass: rgba(0,0,0,.04);
+      --glass: rgba(0, 0, 0, .04);
       --shadow: 0 8px 24px rgba(2, 6, 23, .10);
     }
 
     /* ------------------------
        Base
        ------------------------ */
-    *, *::before, *::after{ box-sizing: border-box }
-    body::before{
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box
+    }
+
+    body::before {
       content: "";
-      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
       background:
-      radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.25), transparent 50%),
-      radial-gradient(800px 400px at 120% 10%, rgba(34,197,94,.18), transparent 50%),
-      var(--bg);
+        radial-gradient(1200px 600px at 10% -10%, rgba(37, 99, 235, .25), transparent 50%),
+        radial-gradient(800px 400px at 120% 10%, rgba(34, 197, 94, .18), transparent 50%),
+        var(--bg);
       background-repeat: no-repeat;
       /* Assure une couverture uniforme sur les écrans très grands */
       background-attachment: fixed;
-      }
-      
-    body{
+    }
+
+    body {
       font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.25), transparent 50%),
-      radial-gradient(800px 400px at 120% 10%, rgba(34,197,94,.18), transparent 50%),
-      var(--bg);
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(37, 99, 235, .25), transparent 50%),
+        radial-gradient(800px 400px at 120% 10%, rgba(34, 197, 94, .18), transparent 50%),
+        var(--bg);
       color: var(--text);
       margin: 0;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
-    .container{ max-width: 1000px; margin: clamp(1.5rem, 3vw, 3rem) auto; padding: 0 clamp(1rem, 2.5vw, 2rem); }
 
-    header{
-      display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom: 1.5rem;
+    .container {
+      max-width: 1000px;
+      margin: clamp(1.5rem, 3vw, 3rem) auto;
+      padding: 0 clamp(1rem, 2.5vw, 2rem);
     }
-    .brand{
-      display:flex; gap:.9rem; align-items:center;
-    }
-    .logo{ width:42px; height:42px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #8b5cf6); box-shadow: var(--shadow); display:grid; place-items:center; color:white; font-weight:800 }
-    .title h1{ font-size: clamp(1.4rem, 3vw, 2rem); margin:.1rem 0 0 0 }
-    .title p{ margin:0; color:var(--muted); }
 
-    .userbox{ display:flex; gap:.75rem; align-items:center; }
-    .avatar{ width:36px; height:36px; border-radius:50%; background: var(--glass); display:grid; place-items:center; font-weight:700 }
-    .logout{ background: transparent; border:1px solid rgba(148,163,184,.25); color: var(--text) }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      gap: .9rem;
+      align-items: center;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800
+    }
+
+    .title h1 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      margin: .1rem 0 0 0
+    }
+
+    .title p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .userbox {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--glass);
+      display: grid;
+      place-items: center;
+      font-weight: 700
+    }
+
+    .logout {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, .25);
+      color: var(--text)
+    }
 
     /* Cards */
-    .grid{ display:grid; grid-template-columns: 1.2fr 1fr; gap: 1.2rem; }
-    @media (max-width: 880px){ .grid{ grid-template-columns: 1fr; } }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)), var(--card);
-      border: 1px solid rgba(148,163,184,.15);
-      border-radius: var(--radius);
-      padding: 1.2rem; box-shadow: var(--shadow);
-      overflow: hidden; /* évite tout débordement (coins arrondis, focus ring, etc.) */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.2rem;
     }
-    .card h2{ margin: 0 0 .75rem 0; font-size: 1.1rem; letter-spacing:.2px }
-    .muted{ color: var(--muted) }
+
+    @media (max-width: 880px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .02), rgba(255, 255, 255, .00)), var(--card);
+      border: 1px solid rgba(148, 163, 184, .15);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      /* évite tout débordement (coins arrondis, focus ring, etc.) */
+    }
+
+    .card h2 {
+      margin: 0 0 .75rem 0;
+      font-size: 1.1rem;
+      letter-spacing: .2px
+    }
+
+    .muted {
+      color: var(--muted)
+    }
 
     /* Forms */
-    form{ display:grid; gap:.75rem; min-width:0 }
-    label{ font-size:.9rem; color: var(--muted) }
-    .row{ display:flex; gap:.6rem; flex-wrap: wrap; min-width:0 }
-    input, select{
-      display:block;
-      width: 100%; max-width: 100%;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(148,163,184,.25);
+    form {
+      display: grid;
+      gap: .75rem;
+      min-width: 0
+    }
+
+    label {
+      font-size: .9rem;
+      color: var(--muted)
+    }
+
+    .row {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      min-width: 0
+    }
+
+    input,
+    select {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(148, 163, 184, .25);
       color: var(--text);
-      padding: .7rem .85rem; border-radius: 12px; outline: none;
+      padding: .7rem .85rem;
+      border-radius: 12px;
+      outline: none;
       transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
-      min-width: 0; /* évite la casse en flex/grid */
+      min-width: 0;
+      /* évite la casse en flex/grid */
     }
-    input::placeholder{ color: #94a3b8 }
-    input:focus, select:focus{ box-shadow: var(--ring); border-color: var(--accent); background: rgba(255,255,255,.08) }
 
-    button{
-      appearance: none; border:0; cursor:pointer; border-radius: 12px; padding: .75rem 1rem; font-weight: 600;
-      background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.0)), var(--accent);
-      color:white; transition: transform .05s ease, filter .2s ease;
+    input::placeholder {
+      color: #94a3b8
     }
-    button:hover{ filter: brightness(1.06) }
-    button:active{ transform: translateY(1px) }
-    .btn-outline{ background: transparent; color:var(--text); border:1px solid rgba(148,163,184,.25) }
-    .btn-success{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.0)), var(--accent-2); }
-    .btn-danger{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.0)), var(--danger); }
-    .btn-full{ width: 100% }
-    .btn-disabled{ opacity:.6; cursor:not-allowed }
 
-    .helper{ font-size:.9rem; color: var(--muted) }
-    .error{ color: var(--danger); font-size:.9rem }
+    input:focus,
+    select:focus {
+      box-shadow: var(--ring);
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, .08)
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: .75rem 1rem;
+      font-weight: 600;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .0)), var(--accent);
+      color: white;
+      transition: transform .05s ease, filter .2s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.06)
+    }
+
+    button:active {
+      transform: translateY(1px)
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, .25)
+    }
+
+    .btn-success {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .0)), var(--accent-2);
+    }
+
+    .btn-danger {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .0)), var(--danger);
+    }
+
+    .btn-full {
+      width: 100%
+    }
+
+    .btn-disabled {
+      opacity: .6;
+      cursor: not-allowed
+    }
+
+    .helper {
+      font-size: .9rem;
+      color: var(--muted)
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: .9rem
+    }
 
     /* Stats */
-    .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:.75rem }
-    .stat{ background: rgba(255,255,255,.04); border:1px solid rgba(148,163,184,.15); border-radius: var(--radius); padding: .9rem }
-    .stat b{ display:block; font-size: 1.35rem; margin-top:.25rem }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem
+    }
 
-    .bar{ height: 10px; border-radius: 999px; background: rgba(148,163,184,.25); overflow:hidden; }
-    .bar > span{ display:block; height:100%; width:0; background: linear-gradient(90deg, var(--accent), #60a5fa); transition: width .6s cubic-bezier(.2,.8,.2,1) }
-    .bar.no > span{ background: linear-gradient(90deg, var(--danger), #fb7185) }
+    .stat {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(148, 163, 184, .15);
+      border-radius: var(--radius);
+      padding: .9rem
+    }
 
-    pre{ white-space: pre-wrap; overflow:auto; background: rgba(0,0,0,.22); border-radius: 12px; padding: .75rem; border:1px solid rgba(148,163,184,.15) }
+    .stat b {
+      display: block;
+      font-size: 1.35rem;
+      margin-top: .25rem
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, .25);
+      overflow: hidden;
+    }
+
+    .bar>span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), #60a5fa);
+      transition: width .6s cubic-bezier(.2, .8, .2, 1)
+    }
+
+    .bar.no>span {
+      background: linear-gradient(90deg, var(--danger), #fb7185)
+    }
+
+    pre {
+      white-space: pre-wrap;
+      overflow: auto;
+      background: rgba(0, 0, 0, .22);
+      border-radius: 12px;
+      padding: .75rem;
+      border: 1px solid rgba(148, 163, 184, .15)
+    }
 
     /* Toasts */
-    .toasts{ position: fixed; right: 16px; bottom: 16px; display:grid; gap:.6rem; z-index: 9999 }
-    .toast{ padding:.8rem 1rem; border-radius: 12px; color: white; box-shadow: var(--shadow); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,.2) }
-    .toast.info{ background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05)), #0ea5e9 }
-    .toast.ok{ background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05)), #22c55e }
-    .toast.err{ background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05)), #ef4444 }
+    .toasts {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      display: grid;
+      gap: .6rem;
+      z-index: 9999
+    }
+
+    .toast {
+      padding: .8rem 1rem;
+      border-radius: 12px;
+      color: white;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, .2)
+    }
+
+    .toast.info {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .05)), #0ea5e9
+    }
+
+    .toast.ok {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .05)), #22c55e
+    }
+
+    .toast.err {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .05)), #ef4444
+    }
 
     /* List (votes) */
-    .list{ display:grid; gap:.6rem }
-    .item{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem .9rem; border:1px solid rgba(148,163,184,.18); border-radius: var(--radius); background: rgba(255,255,255,.04) }
-    .i-left{ display:flex; align-items:center; gap:.8rem }
-    .i-avatar{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background: var(--glass); font-weight:700 }
-    .i-name{ font-weight:600 }
-    .i-email{ color: var(--muted); font-size:.9rem }
-    .i-right{ display:flex; align-items:center; gap:.6rem }
-    .badge{ padding:.25rem .55rem; border-radius:999px; font-weight:700; font-size:.85rem; border:1px solid rgba(148,163,184,.25) }
-    .badge.yes{ background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.0)), var(--accent-2); color:white }
-    .badge.no{ background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.0)), var(--danger); color:white }
-    .i-time{ color: var(--muted); font-size:.85rem }
+    .list {
+      display: grid;
+      gap: .6rem
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+      padding: .75rem .9rem;
+      border: 1px solid rgba(148, 163, 184, .18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .04)
+    }
+
+    .i-left {
+      display: flex;
+      align-items: center;
+      gap: .8rem
+    }
+
+    .i-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--glass);
+      font-weight: 700
+    }
+
+    .i-name {
+      font-weight: 600
+    }
+
+    .i-email {
+      color: var(--muted);
+      font-size: .9rem
+    }
+
+    .i-right {
+      display: flex;
+      align-items: center;
+      gap: .6rem
+    }
+
+    .badge {
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: .85rem;
+      border: 1px solid rgba(148, 163, 184, .25)
+    }
+
+    .badge.yes {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .0)), var(--accent-2);
+      color: white
+    }
+
+    .badge.no {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .0)), var(--danger);
+      color: white
+    }
+
+    .i-time {
+      color: var(--muted);
+      font-size: .85rem
+    }
 
     /* Responsive tweaks */
-    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
-    @media (max-width: 640px){
-      header{ flex-wrap: wrap }
-      .row{ flex-direction: column }
-      button.btn-full, .btn-full{ width:100% }
-      .item{ align-items:flex-start; flex-direction: column }
-      .i-right{ justify-content: flex-start }
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        flex-wrap: wrap
+      }
+
+      .row {
+        flex-direction: column
+      }
+
+      button.btn-full,
+      .btn-full {
+        width: 100%
+      }
+
+      .item {
+        align-items: flex-start;
+        flex-direction: column
+      }
+
+      .i-right {
+        justify-content: flex-start
+      }
     }
 
     /* Small utility */
-    .hidden{ display:none !important }
+    .hidden {
+      display: none !important
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -197,12 +485,14 @@
         <form id="fUser" novalidate>
           <div>
             <label for="pseudo">Pseudo</label>
-            <input id="pseudo" name="pseudo" placeholder="Ex: BayrouFan" autocomplete="nickname" required minlength="2" maxlength="24" />
+            <input id="pseudo" name="pseudo" placeholder="Ex: BayrouFan" autocomplete="nickname" required minlength="2"
+              maxlength="24" />
             <div id="pseudoErr" class="error hidden"></div>
           </div>
           <div>
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" inputmode="email" placeholder="vous@exemple.fr" autocomplete="email" required />
+            <input id="email" name="email" type="email" inputmode="email" placeholder="vous@exemple.fr"
+              autocomplete="email" required />
             <div id="emailErr" class="error hidden"></div>
           </div>
           <button id="btnCreate" type="submit" class="btn-full">Créer mon compte</button>
@@ -253,169 +543,173 @@
   <div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
 
   <script>
-  ;(() => {
-    /**
-     * BayrouMeter – Front moderne (vanilla JS)
-     * - Création de compte UNIQUEMENT depuis le form #fUser
-     * - Vote UNIQUEMENT depuis le form #fVote
-     * - Le bouton Rafraîchir met à jour les résultats sans effets de bord
-     */
+    ; (() => {
+      /**
+       * BayrouMeter – Front moderne (vanilla JS)
+       * - Création de compte UNIQUEMENT depuis le form #fUser
+       * - Vote UNIQUEMENT depuis le form #fVote
+       * - Le bouton Rafraîchir met à jour les résultats sans effets de bord
+       */
 
-    const qs  = (sel) => document.querySelector(sel)
-    const $ = {
-      // Auth
-      fUser: qs('#fUser'), pseudo: qs('#pseudo'), email: qs('#email'), btnCreate: qs('#btnCreate'),
-      pseudoErr: qs('#pseudoErr'), emailErr: qs('#emailErr'), userInfo: qs('#userInfo'),
-      // Vote
-      fVote: qs('#fVote'), choice: qs('#choice'), btnVote: qs('#btnVote'), voteGate: qs('#voteGate'),
-      // Résultats
-      yes: qs('#yes'), no: qs('#no'), total: qs('#total'), userList: qs('#userList'),
-      barYes: qs('#barYes'), barNo: qs('#barNo'),
-      btnRefresh: qs('#btnRefresh'), btnToggleList: qs('#btnToggleList'), userListWrap: qs('#userListWrap'),
-      // Userbox
-      userBox: qs('#userBox'), userName: qs('#userName'), userEmail: qs('#userEmail'), avatar: qs('#avatar'), btnLogout: qs('#btnLogout')
-    }
-
-    // --- Toasts ------------------------------------------------------------
-    function toast(msg, type = 'info', timeout = 4200){
-      const el = document.createElement('div')
-      el.className = `toast ${type}`
-      el.textContent = msg
-      qs('#toasts').appendChild(el)
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; }, timeout - 400)
-      setTimeout(() => el.remove(), timeout)
-    }
-
-    // --- Helpers -----------------------------------------------------------
-    function setLoading(btn, loading){
-      if(!btn) return
-      if(loading){
-        btn.dataset.prevText = btn.textContent
-        btn.innerHTML = '<span class="spinner" aria-hidden="true">⏳</span> Patientez…'
-        btn.classList.add('btn-disabled')
-        btn.disabled = true
-      }else{
-        btn.textContent = btn.dataset.prevText || 'Valider'
-        btn.classList.remove('btn-disabled')
-        btn.disabled = false
+      const qs = (sel) => document.querySelector(sel)
+      const $ = {
+        // Auth
+        fUser: qs('#fUser'), pseudo: qs('#pseudo'), email: qs('#email'), btnCreate: qs('#btnCreate'),
+        pseudoErr: qs('#pseudoErr'), emailErr: qs('#emailErr'), userInfo: qs('#userInfo'),
+        // Vote
+        fVote: qs('#fVote'), choice: qs('#choice'), btnVote: qs('#btnVote'), voteGate: qs('#voteGate'),
+        // Résultats
+        yes: qs('#yes'), no: qs('#no'), total: qs('#total'), userList: qs('#userList'),
+        barYes: qs('#barYes'), barNo: qs('#barNo'),
+        btnRefresh: qs('#btnRefresh'), btnToggleList: qs('#btnToggleList'), userListWrap: qs('#userListWrap'),
+        // Userbox
+        userBox: qs('#userBox'), userName: qs('#userName'), userEmail: qs('#userEmail'), avatar: qs('#avatar'), btnLogout: qs('#btnLogout')
       }
-    }
 
-    function emailValid(v){
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-    }
-
-    function nameInitials(name){
-      const n = (name||'').trim()
-      if(!n) return '🙂'
-      const parts = n.split(/\s+/).slice(0,2)
-      return parts.map(p => p[0]?.toUpperCase()||'').join('')
-    }
-
-    function saveSession(user){
-      try{ localStorage.setItem('bayrou_user', JSON.stringify(user)) }catch{ /* ignore */ }
-    }
-    function loadSession(){
-      try{ return JSON.parse(localStorage.getItem('bayrou_user')||'null') }catch{ return null }
-    }
-    function clearSession(){ localStorage.removeItem('bayrou_user') }
-
-    // --- API wrappers ------------------------------------------------------
-    async function apiCreateUser(pseudo, email){
-      const r = await fetch('/api/user', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pseudo, email })
-      })
-      let data
-      try{ data = await r.json() }catch{ data = { error: 'Réponse serveur invalide.' } }
-      if(!r.ok){
-        // Normaliser quelques erreurs fréquentes
-        let message = data?.error || 'Impossible de créer le compte.'
-        if(r.status === 409 || /exist|used|déjà/i.test(message)) message = 'Cet email est déjà utilisé.'
-        if(r.status === 422 || /email.+(invalid|invalide)/i.test(message)) message = 'Format d’email invalide.'
-        throw new Error(message)
+      // --- Toasts ------------------------------------------------------------
+      function toast(msg, type = 'info', timeout = 4200) {
+        const el = document.createElement('div')
+        el.className = `toast ${type}`
+        el.textContent = msg
+        qs('#toasts').appendChild(el)
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; }, timeout - 400)
+        setTimeout(() => el.remove(), timeout)
       }
-      return data
-    }
 
-    async function apiCastVote(userId, choice){
-      const r = await fetch('/api/vote', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, choice })
-      })
-      let data
-      try{ data = await r.json() }catch{ data = { error: 'Réponse serveur invalide.' } }
-      if(!r.ok){ throw new Error(data?.error || 'Impossible d’enregistrer le vote.') }
-      return data
-    }
-
-    async function apiLoadVotes(){
-      const r = await fetch('/api/votes')
-      let data
-      try{ data = await r.json() }catch{ data = { stats: { yes: 0, no: 0 }, items: [] } }
-      if(!data.stats) data.stats = { yes: 0, no: 0 }
-      if(!Array.isArray(data.items)) data.items = []
-      return data
-    }
-
-    // --- UI state ---------------------------------------------------------
-    function guardVoteUI(){
-      const session = loadSession()
-      if(session?.id){
-        // Afficher box user & formulaire de vote
-        $.userBox.classList.remove('hidden')
-        $.userName.textContent = session.pseudo
-        $.userEmail.textContent = session.email
-        $.avatar.textContent = nameInitials(session.pseudo)
-
-        $.voteGate.classList.add('hidden')
-        $.fVote.classList.remove('hidden')
-      }else{
-        $.userBox.classList.add('hidden')
-        $.voteGate.classList.remove('hidden')
-        $.fVote.classList.add('hidden')
+      // --- Helpers -----------------------------------------------------------
+      function setLoading(btn, loading) {
+        if (!btn) return
+        if (loading) {
+          btn.dataset.prevText = btn.textContent
+          btn.innerHTML = '<span class="spinner" aria-hidden="true">⏳</span> Patientez…'
+          btn.classList.add('btn-disabled')
+          btn.disabled = true
+        } else {
+          btn.textContent = btn.dataset.prevText || 'Valider'
+          btn.classList.remove('btn-disabled')
+          btn.disabled = false
+        }
       }
-    }
 
-    function setBars(yes, no){
-      const total = Math.max(yes + no, 1)
-      const py = Math.round(yes * 100 / total)
-      const pn = Math.round(no  * 100 / total)
-      $.barYes.style.width = py + '%'
-      $.barNo.style.width  = pn + '%'
-    }
-
-    function escapeHtml(str){
-      return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]))
-    }
-
-    function renderList(items){
-      const wrap = $.userList
-      if(!wrap) return
-      wrap.innerHTML = ''
-      if(!Array.isArray(items) || !items.length){
-        const empty = document.createElement('p')
-        empty.className = 'muted'
-        empty.textContent = 'Aucun vote pour le moment.'
-        wrap.appendChild(empty)
-        return
+      function emailValid(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
       }
-      const rows = items.slice().reverse() // plus récent en haut si non trié côté API
-      for(const it of rows){
-        const pseudo = it?.user?.pseudo || it?.pseudo || `User ${String(it?.userId||'').toString().slice(0,6)}`
-        const email  = it?.user?.email  || it?.email  || ''
-        const choiceRaw = String(it?.choice || it?.vote || '').toLowerCase()
-        const choice = choiceRaw === 'yes' ? 'yes' : 'no'
-        const when = it?.createdAt || it?.date || it?.ts || null
-        let timeStr = ''
-        try{ if(when){ const d = new Date(when); if(!isNaN(d)) timeStr = d.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' }) } }catch{}
 
-        const emailHtml = email ? `<div class="i-email">${escapeHtml(email)}</div>` : ''
-        const timeHtml = timeStr ? `<span class="i-time">${escapeHtml(timeStr)}</span>` : ''
+      function nameInitials(name) {
+        const n = (name || '').trim()
+        if (!n) return '🙂'
+        const parts = n.split(/\s+/).slice(0, 2)
+        return parts.map(p => p[0]?.toUpperCase() || '').join('')
+      }
 
-        const row = document.createElement('div')
-        row.className = 'item'
-        row.innerHTML = `
+      function saveSession(user) {
+        try { localStorage.setItem('bayrou_user', JSON.stringify(user)) } catch { /* ignore */ }
+      }
+      function loadSession() {
+        try { return JSON.parse(localStorage.getItem('bayrou_user') || 'null') } catch { return null }
+      }
+      function clearSession() { localStorage.removeItem('bayrou_user') }
+
+      // --- API wrappers ------------------------------------------------------
+      async function apiCreateUser(pseudo, email) {
+        const r = await fetch('/api/user', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pseudo, email })
+        })
+        let data
+        try { data = await r.json() } catch { data = { error: 'Réponse serveur invalide.' } }
+        if (!r.ok) {
+          // Normaliser quelques erreurs fréquentes
+          let message = data?.error || 'Impossible de créer le compte.'
+          if (r.status === 409 || /exist|used|déjà/i.test(message)) message = 'Cet email est déjà utilisé.'
+          if (r.status === 422 || /email.+(invalid|invalide)/i.test(message)) message = 'Format d’email invalide.'
+          throw new Error(message)
+        }
+        return data
+      }
+
+      async function apiCastVote(userId, choice) {
+        const r = await fetch('/api/vote', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, choice })
+        })
+        let data
+        try { data = await r.json() } catch { data = { error: 'Réponse serveur invalide.' } }
+        if (!r.ok) { throw new Error(data?.error || 'Impossible d’enregistrer le vote.') }
+        return data
+      }
+
+      async function apiLoadVotes() {
+        const r = await fetch('/api/votes')
+        let data
+        try { data = await r.json() } catch { data = { stats: { yes: 0, no: 0 }, items: [] } }
+        if (!data.stats) data.stats = { yes: 0, no: 0 }
+        if (!Array.isArray(data.items)) data.items = []
+        return data
+      }
+
+      // --- UI state ---------------------------------------------------------
+      function guardVoteUI() {
+        const session = loadSession()
+        if (session?.id) {
+          // connecté afficher userbox + vote, masquer la création
+          $.userBox.classList.remove('hidden')
+          $.userName.textContent = session.pseudo
+          $.userEmail.textContent = session.email
+          $.avatar.textContent = nameInitials(session.pseudo)
+
+          $.voteGate.classList.add('hidden')
+          $.fVote.classList.remove('hidden')
+          if ($.cardAuth) $.cardAuth.classList.add('hidden')
+        } else {
+          // déconnecté masquer vote, afficher création
+          $.userBox.classList.add('hidden')
+          $.voteGate.classList.remove('hidden')
+          $.fVote.classList.add('hidden')
+          if ($.cardAuth) $.cardAuth.classList.remove('hidden')
+        }
+      }
+
+
+      function setBars(yes, no) {
+        const total = Math.max(yes + no, 1)
+        const py = Math.round(yes * 100 / total)
+        const pn = Math.round(no * 100 / total)
+        $.barYes.style.width = py + '%'
+        $.barNo.style.width = pn + '%'
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[s]))
+      }
+
+      function renderList(items) {
+        const wrap = $.userList
+        if (!wrap) return
+        wrap.innerHTML = ''
+        if (!Array.isArray(items) || !items.length) {
+          const empty = document.createElement('p')
+          empty.className = 'muted'
+          empty.textContent = 'Aucun vote pour le moment.'
+          wrap.appendChild(empty)
+          return
+        }
+        const rows = items.slice().reverse() // plus récent en haut si non trié côté API
+        for (const it of rows) {
+          const pseudo = it?.user?.pseudo || it?.pseudo || `User ${String(it?.userId || '').toString().slice(0, 6)}`
+          const email = it?.user?.email || it?.email || ''
+          const choiceRaw = String(it?.choice || it?.vote || '').toLowerCase()
+          const choice = choiceRaw === 'yes' ? 'yes' : 'no'
+          const when = it?.createdAt || it?.date || it?.ts || null
+          let timeStr = ''
+          try { if (when) { const d = new Date(when); if (!isNaN(d)) timeStr = d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) } } catch { }
+
+          const emailHtml = email ? `<div class="i-email">${escapeHtml(email)}</div>` : ''
+          const timeHtml = timeStr ? `<span class="i-time">${escapeHtml(timeStr)}</span>` : ''
+
+          const row = document.createElement('div')
+          row.className = 'item'
+          row.innerHTML = `
           <div class="i-left">
             <div class="i-avatar">${nameInitials(pseudo)}</div>
             <div>
@@ -430,115 +724,116 @@
             ${timeHtml}
           </div>
         `;
-        wrap.appendChild(row)
-      }
-    }
-
-    async function refreshResults() {
-      const data = await apiLoadVotes()
-      const yes = Number(data.stats.yes || 0)
-      const no  = Number(data.stats.no  || 0)
-      const total = (data.items || []).length
-
-      $.yes.textContent = String(yes)
-      $.no.textContent = String(no)
-      $.total.textContent = String(total)
-
-      setBars(yes, no)
-      renderList(data.items || [])
-    }
-
-    // --- Events ------------------------------------------------------------
-    // 1) Création de compte — UNIQUEMENT via #fUser
-    $.fUser.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      // Reset erreurs
-      $.pseudoErr.classList.add('hidden')
-      $.emailErr.classList.add('hidden')
-
-      const pseudo = $.pseudo.value.trim()
-      const email  = $.email.value.trim().toLowerCase()
-
-      // Validation rapide côté client
-      let hasErr = false
-      if(pseudo.length < 2) {
-        $.pseudoErr.textContent = 'Le pseudo doit faire au moins 2 caractères.'
-        $.pseudoErr.classList.remove('hidden')
-        hasErr = true
-      }
-      if(!emailValid(email)) {
-        $.emailErr.textContent = 'Merci d’indiquer un email valide.'
-        $.emailErr.classList.remove('hidden')
-        hasErr = true
-      }
-      if(hasErr) return
-
-      setLoading($.btnCreate, true)
-      try {
-        const res = await apiCreateUser(pseudo, email)
-        if(res?.id) {
-          const user = { id: res.id, pseudo: res.pseudo || pseudo, email: res.email || email }
-          saveSession(user)
-          $.userInfo.textContent = `Utilisateur créé: ${user.pseudo} (${user.email}) – id=${user.id}`
-          toast('Compte créé et connecté ✅', 'ok')
-          guardVoteUI()
-        } else {
-          throw new Error('Réponse inattendue du serveur.')
+          wrap.appendChild(row)
         }
-      } catch(err) {
-        // Afficher erreur inline email si pertinente
-        const msg = err.message || 'Erreur lors de la création du compte.'
-        if(/email/i.test(msg)){
-          $.emailErr.textContent = msg
+      }
+
+      async function refreshResults() {
+        const data = await apiLoadVotes()
+        const yes = Number(data.stats.yes || 0)
+        const no = Number(data.stats.no || 0)
+        const total = (data.items || []).length
+
+        $.yes.textContent = String(yes)
+        $.no.textContent = String(no)
+        $.total.textContent = String(total)
+
+        setBars(yes, no)
+        renderList(data.items || [])
+      }
+
+      // --- Events ------------------------------------------------------------
+      // 1) Création de compte — UNIQUEMENT via #fUser
+      $.fUser.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        // Reset erreurs
+        $.pseudoErr.classList.add('hidden')
+        $.emailErr.classList.add('hidden')
+
+        const pseudo = $.pseudo.value.trim()
+        const email = $.email.value.trim().toLowerCase()
+
+        // Validation rapide côté client
+        let hasErr = false
+        if (pseudo.length < 2) {
+          $.pseudoErr.textContent = 'Le pseudo doit faire au moins 2 caractères.'
+          $.pseudoErr.classList.remove('hidden')
+          hasErr = true
+        }
+        if (!emailValid(email)) {
+          $.emailErr.textContent = 'Merci d’indiquer un email valide.'
           $.emailErr.classList.remove('hidden')
+          hasErr = true
         }
-        toast(msg, 'err')
-      } finally {
-        setLoading($.btnCreate, false)
-      }
-    })
+        if (hasErr) return
 
-    // 2) Vote — UNIQUEMENT via #fVote
-    $.fVote.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const session = loadSession()
-      if(!session?.id){ toast('Créez un compte pour voter.', 'info'); return }
-      const choice = $.choice.value === 'no' ? 'no' : 'yes'
-      setLoading($.btnVote, true)
-      try{
-        const res = await apiCastVote(session.id, choice)
-        if(res?.status === 'saved'){
-          toast('Vote enregistré 🗳️', 'ok')
-          await refreshResults()
-        }else{
-          throw new Error(res?.error || 'Erreur d’enregistrement du vote.')
+        setLoading($.btnCreate, true)
+        try {
+          const res = await apiCreateUser(pseudo, email)
+          if (res?.id) {
+            const user = { id: res.id, pseudo: res.pseudo || pseudo, email: res.email || email }
+            saveSession(user)
+            $.userInfo.textContent = `Utilisateur créé: ${user.pseudo} (${user.email}) – id=${user.id}`
+            toast('Compte créé et connecté ✅', 'ok')
+            guardVoteUI()
+          } else {
+            throw new Error('Réponse inattendue du serveur.')
+          }
+        } catch (err) {
+          // Afficher erreur inline email si pertinente
+          const msg = err.message || 'Erreur lors de la création du compte.'
+          if (/email/i.test(msg)) {
+            $.emailErr.textContent = msg
+            $.emailErr.classList.remove('hidden')
+          }
+          toast(msg, 'err')
+        } finally {
+          setLoading($.btnCreate, false)
         }
-      }catch(err){
-        toast(err.message || 'Erreur de vote.', 'err')
-      }finally{ setLoading($.btnVote, false) }
-    })
+      })
 
-    // 3) Boutons divers
-    $.btnRefresh.addEventListener('click', async () => {
-      setLoading($.btnRefresh, true)
-      try{ await refreshResults(); toast('Résultats mis à jour.', 'info') }catch{ toast('Impossible de charger les résultats.', 'err') } finally{ setLoading($.btnRefresh, false) }
-    })
+      // 2) Vote — UNIQUEMENT via #fVote
+      $.fVote.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        const session = loadSession()
+        if (!session?.id) { toast('Créez un compte pour voter.', 'info'); return }
+        const choice = $.choice.value === 'no' ? 'no' : 'yes'
+        setLoading($.btnVote, true)
+        try {
+          const res = await apiCastVote(session.id, choice)
+          if (res?.status === 'saved') {
+            toast('Vote enregistré 🗳️', 'ok')
+            await refreshResults()
+          } else {
+            throw new Error(res?.error || 'Erreur d’enregistrement du vote.')
+          }
+        } catch (err) {
+          toast(err.message || 'Erreur de vote.', 'err')
+        } finally { setLoading($.btnVote, false) }
+      })
 
-    $.btnToggleList.addEventListener('click', () => {
-      $.userListWrap.classList.toggle('hidden')
-      $.btnToggleList.textContent = $.userListWrap.classList.contains('hidden') ? 'Afficher les votes' : 'Masquer les votes'
-    })
+      // 3) Boutons divers
+      $.btnRefresh.addEventListener('click', async () => {
+        setLoading($.btnRefresh, true)
+        try { await refreshResults(); toast('Résultats mis à jour.', 'info') } catch { toast('Impossible de charger les résultats.', 'err') } finally { setLoading($.btnRefresh, false) }
+      })
 
-    $.btnLogout.addEventListener('click', () => {
-      clearSession()
+      $.btnToggleList.addEventListener('click', () => {
+        $.userListWrap.classList.toggle('hidden')
+        $.btnToggleList.textContent = $.userListWrap.classList.contains('hidden') ? 'Afficher les votes' : 'Masquer les votes'
+      })
+
+      $.btnLogout.addEventListener('click', () => {
+        clearSession()
+        guardVoteUI()
+        toast('Vous êtes déconnecté.', 'info')
+      })
+
+      // --- Init -------------------------------------------------------------
       guardVoteUI()
-      toast('Vous êtes déconnecté.', 'info')
-    })
-
-    // --- Init -------------------------------------------------------------
-    guardVoteUI()
-    refreshResults().catch(() => {})
-  })()
+      refreshResults().catch(() => { })
+    })()
   </script>
 </body>
+
 </html>

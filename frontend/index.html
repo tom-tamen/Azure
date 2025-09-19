@@ -2,104 +2,512 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
   <title>BayrouMeter</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 720px }
-    form, .card { padding:1rem; border:1px solid #ddd; border-radius:12px; margin-bottom:1rem }
-    button { padding:.6rem 1rem; border-radius:10px; border:0; background:#2563eb; color:#fff; cursor:pointer }
-    input, select { padding:.5rem; border:1px solid #ccc; border-radius:8px; }
-    .stats { display:flex; gap:1rem }
-    .stat { padding:.75rem 1rem; background:#f9fafb; border-radius:12px; }
+    /* ------------------------
+       Design system (CSS vars)
+       ------------------------ */
+    :root{
+      --bg: #0b1020;
+      --card: #0f172a;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --accent: #2563eb;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --ring: 0 0 0 3px rgba(37, 99, 235, .35);
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(2, 6, 23, .55), 0 1px 0 rgba(255,255,255,.06) inset;
+      --glass: rgba(255,255,255,.06);
+    }
+    :root.light{ /* forced light mode if you add class="light" to <html> */
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --muted: #475569;
+      --text: #0f172a;
+      --accent: #2563eb;
+      --accent-2: #16a34a;
+      --danger: #dc2626;
+      --ring: 0 0 0 3px rgba(37, 99, 235, .18);
+      --glass: rgba(0,0,0,.04);
+      --shadow: 0 8px 24px rgba(2, 6, 23, .10);
+    }
+
+    /* ------------------------
+       Base
+       ------------------------ */
+    *, *::before, *::after{ box-sizing: border-box }
+    html,body{height:100%}
+    body{
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.25), transparent 50%),
+                  radial-gradient(800px 400px at 120% 10%, rgba(34,197,94,.18), transparent 50%),
+                  var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    .container{ max-width: 1000px; margin: clamp(1.5rem, 3vw, 3rem) auto; padding: 0 clamp(1rem, 2.5vw, 2rem); }
+
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom: 1.5rem;
+    }
+    .brand{
+      display:flex; gap:.9rem; align-items:center;
+    }
+    .logo{ width:42px; height:42px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #8b5cf6); box-shadow: var(--shadow); display:grid; place-items:center; color:white; font-weight:800 }
+    .title h1{ font-size: clamp(1.4rem, 3vw, 2rem); margin:.1rem 0 0 0 }
+    .title p{ margin:0; color:var(--muted); }
+
+    .userbox{ display:flex; gap:.75rem; align-items:center; }
+    .avatar{ width:36px; height:36px; border-radius:50%; background: var(--glass); display:grid; place-items:center; font-weight:700 }
+    .logout{ background: transparent; border:1px solid rgba(148,163,184,.25); color: var(--text) }
+
+    /* Cards */
+    .grid{ display:grid; grid-template-columns: 1.2fr 1fr; gap: 1.2rem; }
+    @media (max-width: 880px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)), var(--card);
+      border: 1px solid rgba(148,163,184,.15);
+      border-radius: var(--radius);
+      padding: 1.2rem; box-shadow: var(--shadow);
+      overflow: hidden; /* évite tout débordement (coins arrondis, focus ring, etc.) */
+    }
+    .card h2{ margin: 0 0 .75rem 0; font-size: 1.1rem; letter-spacing:.2px }
+    .muted{ color: var(--muted) }
+
+    /* Forms */
+    form{ display:grid; gap:.75rem; min-width:0 }
+    label{ font-size:.9rem; color: var(--muted) }
+    .row{ display:flex; gap:.6rem; flex-wrap: wrap; min-width:0 }
+    input, select{
+      display:block;
+      width: 100%; max-width: 100%;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(148,163,184,.25);
+      color: var(--text);
+      padding: .7rem .85rem; border-radius: 12px; outline: none;
+      transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      min-width: 0; /* évite la casse en flex/grid */
+    }
+    input::placeholder{ color: #94a3b8 }
+    input:focus, select:focus{ box-shadow: var(--ring); border-color: var(--accent); background: rgba(255,255,255,.08) }
+
+    button{
+      appearance: none; border:0; cursor:pointer; border-radius: 12px; padding: .75rem 1rem; font-weight: 600;
+      background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.0)), var(--accent);
+      color:white; transition: transform .05s ease, filter .2s ease;
+    }
+    button:hover{ filter: brightness(1.06) }
+    button:active{ transform: translateY(1px) }
+    .btn-outline{ background: transparent; color:var(--text); border:1px solid rgba(148,163,184,.25) }
+    .btn-success{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.0)), var(--accent-2); }
+    .btn-danger{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.0)), var(--danger); }
+    .btn-full{ width: 100% }
+    .btn-disabled{ opacity:.6; cursor:not-allowed }
+
+    .helper{ font-size:.9rem; color: var(--muted) }
+    .error{ color: var(--danger); font-size:.9rem }
+
+    /* Stats */
+    .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:.75rem }
+    .stat{ background: rgba(255,255,255,.04); border:1px solid rgba(148,163,184,.15); border-radius: var(--radius); padding: .9rem }
+    .stat b{ display:block; font-size: 1.35rem; margin-top:.25rem }
+
+    .bar{ height: 10px; border-radius: 999px; background: rgba(148,163,184,.25); overflow:hidden; }
+    .bar > span{ display:block; height:100%; width:0; background: linear-gradient(90deg, var(--accent), #60a5fa); transition: width .6s cubic-bezier(.2,.8,.2,1) }
+    .bar.no > span{ background: linear-gradient(90deg, var(--danger), #fb7185) }
+
+    pre{ white-space: pre-wrap; overflow:auto; background: rgba(0,0,0,.22); border-radius: 12px; padding: .75rem; border:1px solid rgba(148,163,184,.15) }
+
+    /* Toasts */
+    .toasts{ position: fixed; right: 16px; bottom: 16px; display:grid; gap:.6rem; z-index: 9999 }
+    .toast{ padding:.8rem 1rem; border-radius: 12px; color: white; box-shadow: var(--shadow); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,.2) }
+    .toast.info{ background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05)), #0ea5e9 }
+    .toast.ok{ background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05)), #22c55e }
+    .toast.err{ background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05)), #ef4444 }
+
+    /* List (votes) */
+    .list{ display:grid; gap:.6rem }
+    .item{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem .9rem; border:1px solid rgba(148,163,184,.18); border-radius: var(--radius); background: rgba(255,255,255,.04) }
+    .i-left{ display:flex; align-items:center; gap:.8rem }
+    .i-avatar{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background: var(--glass); font-weight:700 }
+    .i-name{ font-weight:600 }
+    .i-email{ color: var(--muted); font-size:.9rem }
+    .i-right{ display:flex; align-items:center; gap:.6rem }
+    .badge{ padding:.25rem .55rem; border-radius:999px; font-weight:700; font-size:.85rem; border:1px solid rgba(148,163,184,.25) }
+    .badge.yes{ background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.0)), var(--accent-2); color:white }
+    .badge.no{ background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.0)), var(--danger); color:white }
+    .i-time{ color: var(--muted); font-size:.85rem }
+
+    /* Responsive tweaks */
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+    @media (max-width: 640px){
+      header{ flex-wrap: wrap }
+      .row{ flex-direction: column }
+      button.btn-full, .btn-full{ width:100% }
+      .item{ align-items:flex-start; flex-direction: column }
+      .i-right{ justify-content: flex-start }
+    }
+
+    /* Small utility */
+    .hidden{ display:none !important }
   </style>
 </head>
 <body>
-  <h1>??? BayrouMeter</h1>
-  <p><i>�Est-ce que Fran�ois Bayrou nous manque ?�</i></p>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">BM</div>
+        <div class="title">
+          <h1>BayrouMeter</h1>
+          <p class="muted">« Est-ce que François Bayrou nous manque ? »</p>
+        </div>
+      </div>
+      <div id="userBox" class="userbox hidden" aria-live="polite">
+        <div class="avatar" id="avatar" aria-hidden="true">🙂</div>
+        <div>
+          <div id="userName" style="font-weight:700"></div>
+          <div id="userEmail" class="muted" style="font-size:.9rem"></div>
+        </div>
+        <button id="btnLogout" class="btn-outline">Se déconnecter</button>
+      </div>
+    </header>
 
-  <div class="card">
-    <h2>1) Cr�er un utilisateur</h2>
-    <form id="fUser">
-      <input id="pseudo" placeholder="Pseudo" required />
-      <input id="email" type="email" placeholder="Email" required />
-      <button>Cr�er</button>
-    </form>
-    <p id="userInfo"></p>
-  </div>
+    <div class="grid">
+      <!-- Col gauche: Auth + Vote -->
+      <section class="card" id="cardAuth">
+        <h2>1) Créer un compte</h2>
+        <form id="fUser" novalidate>
+          <div>
+            <label for="pseudo">Pseudo</label>
+            <input id="pseudo" name="pseudo" placeholder="Ex: BayrouFan" autocomplete="nickname" required minlength="2" maxlength="24" />
+            <div id="pseudoErr" class="error hidden"></div>
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" inputmode="email" placeholder="vous@exemple.fr" autocomplete="email" required />
+            <div id="emailErr" class="error hidden"></div>
+          </div>
+          <button id="btnCreate" type="submit" class="btn-full">Créer mon compte</button>
+          <p class="helper">En créant un compte, vous pourrez ensuite accéder au vote.</p>
+          <p id="userInfo" class="helper"></p>
+        </form>
+      </section>
 
-  <div class="card">
-    <h2>2) Voter</h2>
-    <form id="fVote">
-      <select id="choice">
-        <option value="yes">Oui</option>
-        <option value="no">Non</option>
-      </select>
-      <button>Voter</button>
-    </form>
-  </div>
+      <section class="card" id="cardVote">
+        <h2>2) Voter</h2>
+        <div id="voteGate" class="muted">Connectez‑vous pour accéder au vote.</div>
+        <form id="fVote" class="hidden">
+          <div class="row">
+            <label for="choice" style="width:100%">Votre avis</label>
+            <select id="choice" name="choice" aria-label="Choix de vote">
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+          <button id="btnVote" type="submit" class="btn-success btn-full">Voter</button>
+          <p class="helper">L’interface de vote n’est disponible que pour les utilisateurs connectés.</p>
+        </form>
+      </section>
 
-  <div class="card">
-    <h2>3) R�sultats</h2>
-    <div class="stats">
-      <div class="stat">?? Oui: <span id="yes">0</span></div>
-      <div class="stat">?? Non: <span id="no">0</span></div>
-      <div class="stat">?? Votes: <span id="total">0</span></div>
+      <!-- Col droite: Résultats -->
+      <section class="card" id="cardResults">
+        <h2>3) Résultats</h2>
+        <div class="stats" role="status" aria-live="polite">
+          <div class="stat"><span class="muted">👍 Oui</span> <b id="yes">0</b>
+            <div class="bar" aria-hidden="true"><span id="barYes"></span></div>
+          </div>
+          <div class="stat"><span class="muted">👎 Non</span> <b id="no">0</b>
+            <div class="bar no" aria-hidden="true"><span id="barNo"></span></div>
+          </div>
+          <div class="stat"><span class="muted">🗳️ Total</span> <b id="total">0</b></div>
+        </div>
+        <div class="row" style="margin-top:.8rem">
+          <button id="btnRefresh" class="btn-outline">Rafraîchir</button>
+          <button id="btnToggleList" class="btn-outline">Afficher les votes</button>
+        </div>
+        <div id="userListWrap" class="hidden" style="margin-top:.8rem">
+          <div id="userList" class="list" aria-live="polite"></div>
+        </div>
+      </section>
     </div>
-    <pre id="list" style="white-space:pre-wrap"></pre>
   </div>
 
-<script>
-let userId = localStorage.getItem("bayrou_userId") || null;
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
 
-async function createUser(pseudo, email){
-  const r = await fetch("/api/user", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ pseudo, email })
-  });
-  return r.json();
-}
-async function castVote(userId, choice){
-  const r = await fetch("/api/vote", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ userId, choice })
-  });
-  return r.json();
-}
-async function loadVotes(){
-  const r = await fetch("/api/votes");
-  const data = await r.json();
-  document.getElementById("yes").textContent   = data.stats.yes || 0;
-  document.getElementById("no").textContent    = data.stats.no || 0;
-  document.getElementById("total").textContent = (data.items || []).length;
-  document.getElementById("list").textContent  = JSON.stringify(data.items || [], null, 2);
-}
+  <script>
+  ;(() => {
+    /**
+     * BayrouMeter – Front moderne (vanilla JS)
+     * - Gestion d’état utilisateur (localStorage)
+     * - Système d’erreurs UX (toasts + inline)
+     * - Accès au vote uniquement si connecté
+     * - UI réactive + barres de progression
+     */
 
-document.getElementById("fUser").addEventListener("submit", async e=>{
-  e.preventDefault();
-  const pseudo = document.getElementById("pseudo").value.trim();
-  const email  = document.getElementById("email").value.trim();
-  const res = await createUser(pseudo,email);
-  if(res.id){
-    userId = res.id;
-    localStorage.setItem("bayrou_userId", userId);
-    document.getElementById("userInfo").textContent = `Utilisateur cr��: ${res.pseudo} (${res.email}) � id=${res.id}`;
-  }else{
-    alert(res.error || "Erreur cr�ation user");
-  }
-});
+    const qs  = (sel) => document.querySelector(sel)
+    const qsa = (sel) => Array.from(document.querySelectorAll(sel))
+    const $ = {
+      fUser: qs('#fUser'), pseudo: qs('#pseudo'), email: qs('#email'), btnCreate: qs('#btnCreate'),
+      pseudoErr: qs('#pseudoErr'), emailErr: qs('#emailErr'), userInfo: qs('#userInfo'),
+      fVote: qs('#fVote'), choice: qs('#choice'), btnVote: qs('#btnVote'), voteGate: qs('#voteGate'),
+      yes: qs('#yes'), no: qs('#no'), total: qs('#total'), userList: qs('#userList'),
+      barYes: qs('#barYes'), barNo: qs('#barNo'),
+      btnRefresh: qs('#btnRefresh'), btnToggleList: qs('#btnToggleList'), userListWrap: qs('#userListWrap'),
+      userBox: qs('#userBox'), userName: qs('#userName'), userEmail: qs('#userEmail'), avatar: qs('#avatar'), btnLogout: qs('#btnLogout')
+    }
 
-document.getElementById("fVote").addEventListener("submit", async e=>{
-  e.preventDefault();
-  if(!userId){ alert("Cr�e un utilisateur d�abord ??"); return; }
-  const choice = document.getElementById("choice").value;
-  const res = await castVote(userId, choice);
-  if(res.status==="saved"){ await loadVotes(); }
-  else alert(res.error || "Erreur vote");
-});
+    // --- Toasts ------------------------------------------------------------
+    function toast(msg, type = 'info', timeout = 4200){
+      const el = document.createElement('div')
+      el.className = `toast ${type}`
+      el.textContent = msg
+      qs('#toasts').appendChild(el)
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; }, timeout - 400)
+      setTimeout(() => el.remove(), timeout)
+    }
 
-loadVotes().catch(()=>{});
-</script>
+    // --- Helpers -----------------------------------------------------------
+    function setLoading(btn, loading){
+      if(!btn) return
+      if(loading){
+        btn.dataset.prevText = btn.textContent
+        btn.innerHTML = '<span class="spinner" aria-hidden="true">⏳</span> Patientez…'
+        btn.classList.add('btn-disabled')
+        btn.disabled = true
+      }else{
+        btn.textContent = btn.dataset.prevText || 'Valider'
+        btn.classList.remove('btn-disabled')
+        btn.disabled = false
+      }
+    }
+
+    function emailValid(v){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+    }
+
+    function nameInitials(name){
+      const n = (name||'').trim()
+      if(!n) return '🙂'
+      const parts = n.split(/\s+/).slice(0,2)
+      return parts.map(p => p[0]?.toUpperCase()||'').join('')
+    }
+
+    function saveSession(user){
+      try{ localStorage.setItem('bayrou_user', JSON.stringify(user)) }catch{ /* ignore */ }
+    }
+    function loadSession(){
+      try{ return JSON.parse(localStorage.getItem('bayrou_user')||'null') }catch{ return null }
+    }
+    function clearSession(){ localStorage.removeItem('bayrou_user') }
+
+    // --- API wrappers ------------------------------------------------------
+    async function apiCreateUser(pseudo, email){
+      const r = await fetch('/api/user', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pseudo, email })
+      })
+      let data
+      try{ data = await r.json() }catch{ data = { error: 'Réponse serveur invalide.' } }
+      if(!r.ok){
+        // Normaliser quelques erreurs fréquentes
+        let message = data?.error || 'Impossible de créer le compte.'
+        if(r.status === 409 || /exist|used|déjà/i.test(message)) message = 'Cet email est déjà utilisé.'
+        if(r.status === 422 || /email.+(invalid|invalide)/i.test(message)) message = 'Format d’email invalide.'
+        throw new Error(message)
+      }
+      return data
+    }
+
+    async function apiCastVote(userId, choice){
+      const r = await fetch('/api/vote', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, choice })
+      })
+      let data
+      try{ data = await r.json() }catch{ data = { error: 'Réponse serveur invalide.' } }
+      if(!r.ok){ throw new Error(data?.error || 'Impossible d’enregistrer le vote.') }
+      return data
+    }
+
+    async function apiLoadVotes(){
+      const r = await fetch('/api/votes')
+      let data
+      try{ data = await r.json() }catch{ data = { stats: { yes: 0, no: 0 }, items: [] } }
+      if(!data.stats) data.stats = { yes: 0, no: 0 }
+      if(!Array.isArray(data.items)) data.items = []
+      return data
+    }
+
+    // --- UI state ---------------------------------------------------------
+    function guardVoteUI(){
+      const session = loadSession()
+      if(session?.id){
+        // Afficher box user & formulaire de vote
+        $.userBox.classList.remove('hidden')
+        $.userName.textContent = session.pseudo
+        $.userEmail.textContent = session.email
+        $.avatar.textContent = nameInitials(session.pseudo)
+
+        $.voteGate.classList.add('hidden')
+        $.fVote.classList.remove('hidden')
+      }else{
+        $.userBox.classList.add('hidden')
+        $.voteGate.classList.remove('hidden')
+        $.fVote.classList.add('hidden')
+      }
+    }
+
+    function setBars(yes, no){
+      const total = Math.max(yes + no, 1)
+      const py = Math.round(yes * 100 / total)
+      const pn = Math.round(no  * 100 / total)
+      $.barYes.style.width = py + '%'
+      $.barNo.style.width  = pn + '%'
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]))
+    }
+
+    function renderList(items){
+      const wrap = $.userList
+      if(!wrap) return
+      wrap.innerHTML = ''
+      if(!Array.isArray(items) || !items.length){
+        const empty = document.createElement('p')
+        empty.className = 'muted'
+        empty.textContent = 'Aucun vote pour le moment.'
+        wrap.appendChild(empty)
+        return
+      }
+      const rows = items.slice().reverse() // plus récent en haut si non trié côté API
+      for(const it of rows){
+        const pseudo = it?.user?.pseudo || it?.pseudo || `User ${String(it?.userId||'').toString().slice(0,6)}`
+        const email  = it?.user?.email  || it?.email  || ''
+        const choiceRaw = String(it?.choice || it?.vote || '').toLowerCase()
+        const choice = choiceRaw === 'yes' ? 'yes' : 'no'
+        const when = it?.createdAt || it?.date || it?.ts || null
+        let timeStr = ''
+        try{ if(when){ const d = new Date(when); if(!isNaN(d)) timeStr = d.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' }) } }catch{}
+
+        const row = document.createElement('div')
+        row.className = 'item'
+        row.innerHTML = `
+          <div class="i-left">
+            <div class="i-avatar">${nameInitials(pseudo)}</div>
+            <div>
+              <div class="i-name">${escapeHtml(pseudo)}</div>
+              ${emailHtml}
+            </div>
+          </div>
+          <div class="i-right">
+            <span class="badge ${choice}">
+              ${choice === 'yes' ? '👍 Oui' : '👎 Non'}
+            </span>
+            ${timeHtml}
+          </div>
+        `;
+        wrap.appendChild(row)
+      }
+    }
+
+    async function refreshResults() {
+      const data = await apiLoadVotes()
+      const yes = Number(data.stats.yes || 0)
+      const no  = Number(data.stats.no  || 0)
+      const total = (data.items || []).length
+
+      $.yes.textContent = String(yes)
+      $.no.textContent = String(no)
+      $.total.textContent = String(total)
+
+      setBars(yes, no)
+      renderList(data.items || [])
+      $.emailErr.classList.add('hidden')
+
+      const pseudo = $.pseudo.value.trim()
+      const email  = $.email.value.trim().toLowerCase()
+
+      // Validation rapide côté client
+      let hasErr = false
+      if(pseudo.length < 2) {
+        $.pseudoErr.textContent = 'Le pseudo doit faire au moins 2 caractères.'
+        $.pseudoErr.classList.remove('hidden')
+        hasErr = true
+      }
+      if(!emailValid(email)) {
+        $.emailErr.textContent = 'Merci d’indiquer un email valide.'
+        $.emailErr.classList.remove('hidden')
+        hasErr = true
+      }
+      if(hasErr) return
+
+      setLoading($.btnCreate, true)
+      try {
+        const res = await apiCreateUser(pseudo, email)
+        if(res?.id) {
+          const user = { id: res.id, pseudo: res.pseudo || pseudo, email: res.email || email }
+          saveSession(user)
+          $.userInfo.textContent = `Utilisateur créé: ${user.pseudo} (${user.email}) – id=${user.id}`
+          toast('Compte créé et connecté ✅', 'ok')
+          guardVoteUI()
+        } else {
+          throw new Error('Réponse inattendue du serveur.')
+        }
+      } catch(err) {
+        toast(err.message || 'Erreur lors de la création du compte.', 'err')
+      } finally {
+        setLoading($.btnCreate, false)
+      }
+    }
+
+
+    $.fVote.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const session = loadSession()
+      if(!session?.id){ toast('Créez un compte pour voter.', 'info'); return }
+      const choice = $.choice.value
+      setLoading($.btnVote, true)
+      try{
+        const res = await apiCastVote(session.id, choice)
+        if(res?.status === 'saved'){
+          toast('Vote enregistré 🗳️', 'ok')
+          await refreshResults()
+        }else{
+          throw new Error(res?.error || 'Erreur d’enregistrement du vote.')
+        }
+      }catch(err){
+        toast(err.message || 'Erreur de vote.', 'err')
+      }finally{ setLoading($.btnVote, false) }
+    })
+
+    $.btnRefresh.addEventListener('click', async () => {
+      setLoading($.btnRefresh, true)
+      try{ await refreshResults(); toast('Résultats mis à jour.', 'info') }catch{ toast('Impossible de charger les résultats.', 'err') } finally{ setLoading($.btnRefresh, false) }
+    })
+
+    $.btnToggleList.addEventListener('click', () => {
+      $.rawListWrap.classList.toggle('hidden')
+      $.btnToggleList.textContent = $.rawListWrap.classList.contains('hidden') ? 'Afficher les votes' : 'Masquer les votes'
+    })
+
+    $.btnLogout.addEventListener('click', () => {
+      clearSession()
+      guardVoteUI()
+      toast('Vous êtes déconnecté.', 'info')
+    })
+
+    // --- Init -------------------------------------------------------------
+    guardVoteUI()
+    refreshResults().catch(() => {})
+  })()
+  </script>
 </body>
 </html>

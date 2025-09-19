@@ -1,26 +1,23 @@
 # ============================================
 # CI/CD Azure Static Web Apps + API (Node/Jest)
-# - Pipeline unique : tests API -> build/deploy
-# - Auth via deployment token (secret GitHub)
-# - Préviews automatiques pour les Pull Requests
+# - Tests API (Jest) -> Build & Deploy SWA
+# - Déploiement sur push main
+# - Préviews automatiques sur Pull Requests
 # - Fermeture auto des environnements PR à la clôture
-# - Concurrency pour éviter les déploiements parallèles
-# Structure visée :
-#   /api           -> Azure Functions (+ tests Jest dans /api/__tests__)
-#   /              -> frontend statique (index.html au root)
+# - Concurrency : évite les runs parallèles sur la même ref
+# - Check du token SWA (présence + pas de newline)
 # ============================================
 
 name: CI/CD Azure Static Web Apps
 
 on:
-  # Déclenchement sur push et pull_request (branche main)
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, closed]
+    branches: [ main ]
+    types: [ opened, synchronize, reopened, closed ]
+  workflow_dispatch:
 
-# Empêche les déploiements concurrents sur la même ref (branche/PR)
 concurrency:
   group: swa-${{ github.ref }}
   cancel-in-progress: true
@@ -33,14 +30,9 @@ jobs:
     name: API tests
     runs-on: ubuntu-latest
     steps:
-      # Récupération du code source
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Installation de Node.js + activation du cache npm
-      # Les chemins de lockfiles servent de clé pour le cache :
-      #  - api/package-lock.json (API)
-      #  - package-lock.json (frontend statique au root)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -50,48 +42,36 @@ jobs:
             api/package-lock.json
             package-lock.json
 
-      # Installation des dépendances API (npm ci pour des builds déterministes)
       - name: Install API dependencies
         working-directory: api
         run: npm ci
 
-      # Exécution des tests unitaires (Jest ; config détectée : api/jest.config.js)
       - name: Run API unit tests
         working-directory: api
         run: npm test
 
   # ------------------------------
   # 2) Build & Deploy Azure SWA
-  #    (exécuté uniquement si les tests réussissent)
+  #    (seulement si les tests passent)
   # ------------------------------
   build_and_deploy:
     name: Build & Deploy (Azure SWA)
-    needs: api-tests  # Dépendance explicite : ce job attend la réussite des tests
-    # Sur push : déploiement.
-    # Sur PR : environnement de preview (sauf quand la PR est fermée).
+    needs: api-tests
+    # Sur push -> déploiement prod
+    # Sur PR   -> preview (sauf quand PR "closed")
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
 
-    # Permissions minimales :
-    # - contents:read pour lire le repo
-    # (OIDC non requis ici car déploiement par token)
     permissions:
       contents: read
 
-    # Environnement GitHub :
-    # - "production" pour les pushes
-    # - "preview" pour les PR (pratique pour des règles/approvals différentes)
-    environment: ${{ github.event_name == 'push' && 'production' || 'preview' }}
-
     steps:
-      # Récupération du code source
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: true  # Inclure d'éventuels submodules
-          lfs: false        # Git LFS non requis dans ce contexte
+          submodules: true
+          lfs: false
 
-      # Installation de Node.js + cache npm partagé (API + root)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -101,20 +81,28 @@ jobs:
             api/package-lock.json
             package-lock.json
 
+      # Vérifie que le secret est bien injecté et sans espaces/newlines
+      - name: Check SWA token presence and cleanliness
+        run: |
+          if [ -z "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}" ]; then
+            echo "ERROR: AZURE_STATIC_WEB_APPS_API_TOKEN secret is missing."; exit 1
+          fi
+          RAW_LEN=$(echo -n "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}" | wc -c)
+          CLEAN_LEN=$(echo -n "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}" | tr -d ' \n\r' | wc -c)
+          echo "Token length: $RAW_LEN | Clean length: $CLEAN_LEN"
+          if [ "$RAW_LEN" -ne "$CLEAN_LEN" ]; then
+            echo "ERROR: Token contains whitespace/newlines. Recollez-le sur une seule ligne dans GitHub Secrets."; exit 1
+          fi
+          echo -n "Token fingerprint: "; echo -n "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}" | sha256sum | cut -c1-16
 
-      # Déploiement vers Azure Static Web Apps
-      # Auth par token (secret GitHub) requis par l'action de déploiement
       - name: Build And Deploy to Azure Static Web Apps
-        id: swa
         uses: Azure/static-web-apps-deploy@v1
         with:
-          action: upload                   # Type d'action : upload (déploiement)
-          # Emplacement du frontend :
-          app_location: "./frontend"
-          # Emplacement de l'API (Azure Functions)
-          api_location: "./api"
-      
-          # Secret requis : token de déploiement SWA
+          action: upload
+          app_location: ./frontend
+          api_location: ./api
+          data_api_location: ""     # évite la vérif 'swa-db-connections'
+          production_branch: main   # explicite
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
 
   # ------------------------------

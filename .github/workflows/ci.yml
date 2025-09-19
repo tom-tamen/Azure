@@ -1,24 +1,155 @@
-name: CI - API tests
+# ============================================
+# CI/CD Azure Static Web Apps + API (Node/Jest)
+# - Pipeline unique : tests API -> build/deploy
+# - Auth OIDC (pas de secret) vers Azure SWA
+# - Préviews automatiques pour les Pull Requests
+# - Fermeture auto des environnements PR à la clôture
+# - Concurrency pour éviter les déploiements parallèles
+# Structure visée :
+#   /api           -> Azure Functions (+ tests Jest dans /api/__tests__)
+#   /              -> frontend statique (index.html au root)
+# ============================================
+
+name: CI/CD Azure Static Web Apps
 
 on:
+  # Déclenchement sur push et pull_request (branche main)
   push:
-    branches: ["main"] # Trigger the workflow when code is pushed to the main branch
+    branches: [main]
   pull_request:
-    branches: ["main"] # Trigger the workflow for pull requests targeting the main branch
+    branches: [main]
+    types: [opened, synchronize, reopened, closed]
+
+# Empêche les déploiements concurrents sur la même ref (branche/PR)
+concurrency:
+  group: swa-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # ------------------------------
+  # 1) Tests de l'API (Jest)
+  # ------------------------------
   api-tests:
-    runs-on: ubuntu-latest # Use the latest Ubuntu runner environment
+    name: API tests
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # Check out the repository code so it can be accessed in the workflow
-      - uses: actions/setup-node@v4
+      # Récupération du code source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Installation de Node.js + activation du cache npm
+      # Les chemins de lockfiles servent de clé pour le cache :
+      #  - api/package-lock.json (API)
+      #  - package-lock.json (frontend statique au root)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "18" # Set up Node.js version 18
-          cache: "npm" # Enable npm dependency caching for faster builds
-          cache-dependency-path: api/package-lock.json # Use the package-lock.json file inside the api folder for cache hashing
-      - name: Install dependencies
-        working-directory: api # Change working directory to the api folder
-        run: npm install # Install the project dependencies defined in package.json
-      - name: Run unit tests
-        working-directory: api # Change working directory to the api folder
-        run: npm test # Run the unit tests defined in the project
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: |
+            api/package-lock.json
+            package-lock.json
+
+      # Installation des dépendances API (npm ci pour des builds déterministes)
+      - name: Install API dependencies
+        working-directory: api
+        run: npm ci
+
+      # Exécution des tests unitaires (Jest ; config détectée : api/jest.config.js)
+      - name: Run API unit tests
+        working-directory: api
+        run: npm test
+
+  # ------------------------------
+  # 2) Build & Deploy Azure SWA
+  #    (exécuté uniquement si les tests réussissent)
+  # ------------------------------
+  build_and_deploy:
+    name: Build & Deploy (Azure SWA)
+    needs: api-tests  # Dépendance explicite : ce job attend la réussite des tests
+    # Sur push : déploiement.
+    # Sur PR : environnement de preview (sauf quand la PR est fermée).
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+
+    # Permissions minimales :
+    # - id-token:write pour OIDC (auth sans secret)
+    # - contents:read pour lire le repo
+    permissions:
+      id-token: write
+      contents: read
+
+    # Environnement GitHub :
+    # - "production" pour les pushes
+    # - "preview" pour les PR (pratique pour des règles/approvals différentes)
+    environment: ${{ github.event_name == 'push' && 'production' || 'preview' }}
+
+    steps:
+      # Récupération du code source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true  # Inclure d'éventuels submodules
+          lfs: false        # Git LFS non requis dans ce contexte
+
+      # Installation de Node.js + cache npm partagé (API + root)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: |
+            api/package-lock.json
+            package-lock.json
+
+      # (Optionnel) Étapes de build du frontend si nécessaire (Vite/CRA/Next, etc.)
+      # Pour un simple index.html au root, aucun build n'est requis.
+      #
+      # - name: Install & Build frontend
+      #   working-directory: .
+      #   run: |
+      #     npm ci
+      #     npm run build
+      #
+      # Si ce bloc est activé, ajuster output_location plus bas.
+
+      # Obtention d'un ID Token OIDC émis par GitHub Actions
+      # Ce jeton est utilisé par l'action Azure pour l'authentification fédérée
+      - name: Get OIDC Id Token
+        id: idtoken
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            return await core.getIDToken();
+          result-encoding: string
+
+      # Déploiement vers Azure Static Web Apps
+      - name: Build And Deploy to Azure Static Web Apps
+        id: swa
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          action: upload                   # Type d'action : upload (déploiement)
+          # Emplacement du frontend :
+          # - index.html à la racine -> app_location: "/"
+          # - si le frontend vit sous ./frontend, remplacer par "./frontend"
+          app_location: "/"
+          # Emplacement de l'API (Azure Functions)
+          api_location: "api"
+          # Dossier de sortie du build frontend (si un build est réalisé) :
+          # output_location: "dist"        # ex. Vite -> dist, CRA -> build
+          # Auth OIDC : passage du jeton obtenu plus haut
+          github_id_token: ${{ steps.idtoken.outputs.result }}
+
+  # ------------------------------
+  # 3) Fermeture de l'environnement de preview (PR)
+  # ------------------------------
+  close_pr_preview:
+    name: Close PR preview
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PR environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          action: close

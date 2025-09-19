@@ -1,0 +1,11 @@
+name: CI - API quick test
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node version
+        run: node -v

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BayrouMeter</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 720px }
+    form, .card { padding:1rem; border:1px solid #ddd; border-radius:12px; margin-bottom:1rem }
+    button { padding:.6rem 1rem; border-radius:10px; border:0; background:#2563eb; color:#fff; cursor:pointer }
+    input, select { padding:.5rem; border:1px solid #ccc; border-radius:8px; }
+    .stats { display:flex; gap:1rem }
+    .stat { padding:.75rem 1rem; background:#f9fafb; border-radius:12px; }
+  </style>
+</head>
+<body>
+  <h1>??? BayrouMeter</h1>
+  <p><i>“Est-ce que François Bayrou nous manque ?”</i></p>
+
+  <div class="card">
+    <h2>1) Créer un utilisateur</h2>
+    <form id="fUser">
+      <input id="pseudo" placeholder="Pseudo" required />
+      <input id="email" type="email" placeholder="Email" required />
+      <button>Créer</button>
+    </form>
+    <p id="userInfo"></p>
+  </div>
+
+  <div class="card">
+    <h2>2) Voter</h2>
+    <form id="fVote">
+      <select id="choice">
+        <option value="yes">Oui</option>
+        <option value="no">Non</option>
+      </select>
+      <button>Voter</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>3) Résultats</h2>
+    <div class="stats">
+      <div class="stat">?? Oui: <span id="yes">0</span></div>
+      <div class="stat">?? Non: <span id="no">0</span></div>
+      <div class="stat">?? Votes: <span id="total">0</span></div>
+    </div>
+    <pre id="list" style="white-space:pre-wrap"></pre>
+  </div>
+
+<script>
+let userId = localStorage.getItem("bayrou_userId") || null;
+
+async function createUser(pseudo, email){
+  const r = await fetch("/api/user", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ pseudo, email })
+  });
+  return r.json();
+}
+async function castVote(userId, choice){
+  const r = await fetch("/api/vote", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ userId, choice })
+  });
+  return r.json();
+}
+async function loadVotes(){
+  const r = await fetch("/api/votes");
+  const data = await r.json();
+  document.getElementById("yes").textContent   = data.stats.yes || 0;
+  document.getElementById("no").textContent    = data.stats.no || 0;
+  document.getElementById("total").textContent = (data.items || []).length;
+  document.getElementById("list").textContent  = JSON.stringify(data.items || [], null, 2);
+}
+
+document.getElementById("fUser").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const pseudo = document.getElementById("pseudo").value.trim();
+  const email  = document.getElementById("email").value.trim();
+  const res = await createUser(pseudo,email);
+  if(res.id){
+    userId = res.id;
+    localStorage.setItem("bayrou_userId", userId);
+    document.getElementById("userInfo").textContent = `Utilisateur créé: ${res.pseudo} (${res.email}) — id=${res.id}`;
+  }else{
+    alert(res.error || "Erreur création user");
+  }
+});
+
+document.getElementById("fVote").addEventListener("submit", async e=>{
+  e.preventDefault();
+  if(!userId){ alert("Crée un utilisateur d’abord ??"); return; }
+  const choice = document.getElementById("choice").value;
+  const res = await castVote(userId, choice);
+  if(res.status==="saved"){ await loadVotes(); }
+  else alert(res.error || "Erreur vote");
+});
+
+loadVotes().catch(()=>{});
+</script>
+</body>
+</html>

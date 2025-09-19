@@ -110,14 +110,11 @@ jobs:
         with:
           action: upload                   # Type d'action : upload (déploiement)
           # Emplacement du frontend :
-          # - index.html à la racine -> app_location: "/"
-          # - si le frontend vit sous ./frontend, remplacer par "./frontend"
-          app_location: "frontend"
+          app_location: "./frontend"
           # Emplacement de l'API (Azure Functions)
-          api_location: "api"
-          # Dossier de sortie du build frontend (si un build est réalisé) :
-          # output_location: "dist"        # ex. Vite -> dist, CRA -> build
-          # Secret requis : token de déploiement SWA
+          api_location: "./api"
+      
+          # Secret requis : token de déploiement SW
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_FOREST_0D1AE6403 }}
 
   # ------------------------------

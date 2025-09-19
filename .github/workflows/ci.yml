@@ -1,7 +1,7 @@
 # ============================================
 # CI/CD Azure Static Web Apps + API (Node/Jest)
 # - Pipeline unique : tests API -> build/deploy
-# - Auth OIDC (pas de secret) vers Azure SWA
+# - Auth via deployment token (secret GitHub)
 # - Préviews automatiques pour les Pull Requests
 # - Fermeture auto des environnements PR à la clôture
 # - Concurrency pour éviter les déploiements parallèles
@@ -73,10 +73,9 @@ jobs:
     runs-on: ubuntu-latest
 
     # Permissions minimales :
-    # - id-token:write pour OIDC (auth sans secret)
     # - contents:read pour lire le repo
+    # (OIDC non requis ici car déploiement par token)
     permissions:
-      id-token: write
       contents: read
 
     # Environnement GitHub :
@@ -114,7 +113,7 @@ jobs:
       # Si ce bloc est activé, ajuster output_location plus bas.
 
       # Déploiement vers Azure Static Web Apps
-      # Auth OIDC automatique : aucun github_id_token ni secret de déploiement requis
+      # Auth par token (secret GitHub) requis par l'action de déploiement
       - name: Build And Deploy to Azure Static Web Apps
         id: swa
         uses: Azure/static-web-apps-deploy@v1
@@ -128,6 +127,8 @@ jobs:
           api_location: "api"
           # Dossier de sortie du build frontend (si un build est réalisé) :
           # output_location: "dist"        # ex. Vite -> dist, CRA -> build
+          # Secret requis : token de déploiement SWA
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_FOREST_0D1AE6403 }}
 
   # ------------------------------
   # 3) Fermeture de l'environnement de preview (PR)

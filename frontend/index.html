@@ -39,12 +39,23 @@
        Base
        ------------------------ */
     *, *::before, *::after{ box-sizing: border-box }
-    html,body{height:100%}
+    body::before{
+      content: "";
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.25), transparent 50%),
+      radial-gradient(800px 400px at 120% 10%, rgba(34,197,94,.18), transparent 50%),
+      var(--bg);
+      background-repeat: no-repeat;
+      /* Assure une couverture uniforme sur les écrans très grands */
+      background-attachment: fixed;
+      }
+      
     body{
       font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
       background: radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.25), transparent 50%),
-                  radial-gradient(800px 400px at 120% 10%, rgba(34,197,94,.18), transparent 50%),
-                  var(--bg);
+      radial-gradient(800px 400px at 120% 10%, rgba(34,197,94,.18), transparent 50%),
+      var(--bg);
       color: var(--text);
       margin: 0;
       -webkit-font-smoothing: antialiased;
@@ -245,21 +256,23 @@
   ;(() => {
     /**
      * BayrouMeter – Front moderne (vanilla JS)
-     * - Gestion d’état utilisateur (localStorage)
-     * - Système d’erreurs UX (toasts + inline)
-     * - Accès au vote uniquement si connecté
-     * - UI réactive + barres de progression
+     * - Création de compte UNIQUEMENT depuis le form #fUser
+     * - Vote UNIQUEMENT depuis le form #fVote
+     * - Le bouton Rafraîchir met à jour les résultats sans effets de bord
      */
 
     const qs  = (sel) => document.querySelector(sel)
-    const qsa = (sel) => Array.from(document.querySelectorAll(sel))
     const $ = {
+      // Auth
       fUser: qs('#fUser'), pseudo: qs('#pseudo'), email: qs('#email'), btnCreate: qs('#btnCreate'),
       pseudoErr: qs('#pseudoErr'), emailErr: qs('#emailErr'), userInfo: qs('#userInfo'),
+      // Vote
       fVote: qs('#fVote'), choice: qs('#choice'), btnVote: qs('#btnVote'), voteGate: qs('#voteGate'),
+      // Résultats
       yes: qs('#yes'), no: qs('#no'), total: qs('#total'), userList: qs('#userList'),
       barYes: qs('#barYes'), barNo: qs('#barNo'),
       btnRefresh: qs('#btnRefresh'), btnToggleList: qs('#btnToggleList'), userListWrap: qs('#userListWrap'),
+      // Userbox
       userBox: qs('#userBox'), userName: qs('#userName'), userEmail: qs('#userEmail'), avatar: qs('#avatar'), btnLogout: qs('#btnLogout')
     }
 
@@ -397,6 +410,9 @@
         let timeStr = ''
         try{ if(when){ const d = new Date(when); if(!isNaN(d)) timeStr = d.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' }) } }catch{}
 
+        const emailHtml = email ? `<div class="i-email">${escapeHtml(email)}</div>` : ''
+        const timeHtml = timeStr ? `<span class="i-time">${escapeHtml(timeStr)}</span>` : ''
+
         const row = document.createElement('div')
         row.className = 'item'
         row.innerHTML = `
@@ -430,6 +446,14 @@
 
       setBars(yes, no)
       renderList(data.items || [])
+    }
+
+    // --- Events ------------------------------------------------------------
+    // 1) Création de compte — UNIQUEMENT via #fUser
+    $.fUser.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      // Reset erreurs
+      $.pseudoErr.classList.add('hidden')
       $.emailErr.classList.add('hidden')
 
       const pseudo = $.pseudo.value.trim()
@@ -462,18 +486,24 @@
           throw new Error('Réponse inattendue du serveur.')
         }
       } catch(err) {
-        toast(err.message || 'Erreur lors de la création du compte.', 'err')
+        // Afficher erreur inline email si pertinente
+        const msg = err.message || 'Erreur lors de la création du compte.'
+        if(/email/i.test(msg)){
+          $.emailErr.textContent = msg
+          $.emailErr.classList.remove('hidden')
+        }
+        toast(msg, 'err')
       } finally {
         setLoading($.btnCreate, false)
       }
-    }
+    })
 
-
+    // 2) Vote — UNIQUEMENT via #fVote
     $.fVote.addEventListener('submit', async (e) => {
       e.preventDefault()
       const session = loadSession()
       if(!session?.id){ toast('Créez un compte pour voter.', 'info'); return }
-      const choice = $.choice.value
+      const choice = $.choice.value === 'no' ? 'no' : 'yes'
       setLoading($.btnVote, true)
       try{
         const res = await apiCastVote(session.id, choice)
@@ -488,14 +518,15 @@
       }finally{ setLoading($.btnVote, false) }
     })
 
+    // 3) Boutons divers
     $.btnRefresh.addEventListener('click', async () => {
       setLoading($.btnRefresh, true)
       try{ await refreshResults(); toast('Résultats mis à jour.', 'info') }catch{ toast('Impossible de charger les résultats.', 'err') } finally{ setLoading($.btnRefresh, false) }
     })
 
     $.btnToggleList.addEventListener('click', () => {
-      $.rawListWrap.classList.toggle('hidden')
-      $.btnToggleList.textContent = $.rawListWrap.classList.contains('hidden') ? 'Afficher les votes' : 'Masquer les votes'
+      $.userListWrap.classList.toggle('hidden')
+      $.btnToggleList.textContent = $.userListWrap.classList.contains('hidden') ? 'Afficher les votes' : 'Masquer les votes'
     })
 
     $.btnLogout.addEventListener('click', () => {

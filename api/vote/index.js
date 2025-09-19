@@ -11,7 +11,7 @@ module.exports = async function (context, req) {
       return;
     }
 
-    // Empêche le double vote
+    // Empeche le double vote
     const existing = await getVoteByUserId(userId);
     if(existing){
       context.res = { status: 409, body: { error: "User already voted." } };

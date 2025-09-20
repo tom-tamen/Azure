@@ -1,0 +1,123 @@
+# CI/CD for Azure Static Web Apps with a Node API tested by Jest.
+# This workflow runs unit tests for the API, then builds and deploys the app.
+# It deploys production on pushes to main, creates preview environments on PRs,
+# and automatically tears down the preview when the PR is closed.
+
+name: CI/CD Azure Static Web Apps
+
+on:
+  # Deploys/updates the production environment when commits land in main
+  push:
+    branches: [ main ]
+  # For pull requests targeting main: create/update a preview environment,
+  # and later close it when the PR is closed (handled by the separate job below)
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened, closed ]
+  # Allow manual runs from the Actions tab (useful for retries)
+  workflow_dispatch:
+
+concurrency:
+  # Ensure only one run per ref (branch/PR) is active at a time.
+  # New runs cancel any in-progress run for the same ref to avoid racing deployments.
+  group: swa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------
+  # API unit tests (Jest)
+  # ----------------------------
+  api-tests:
+    name: API tests
+    runs-on: ubuntu-latest
+    steps:
+      # Fetch repository contents at the current commit/PR head
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install a pinned Node.js version and enable npm cache
+      # The cache-dependency-path covers both the API and root lockfiles,
+      # improving cache hits for monorepos.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: |
+            api/package-lock.json
+            package-lock.json
+
+      # Install API dependencies using a clean, lockfile-respecting install
+      - name: Install deps (API)
+        working-directory: api
+        run: npm ci
+
+      # Run the API unit tests; the workflow stops here if tests fail
+      - name: Run tests (API)
+        working-directory: api
+        run: npm test
+
+  # ----------------------------
+  # Build & Deploy to Azure SWA
+  # Runs only if tests succeed
+  # ----------------------------
+  build_and_deploy:
+    name: Build & Deploy (Azure SWA)
+    needs: api-tests
+    # On push: deploy to production
+    # On PR: deploy to a temporary preview environment (except when PR is closed)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Read access to repository contents is sufficient for this action
+      contents: read
+
+    steps:
+      # Checkout source code (again for this job's workspace)
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true   # include git submodules if any
+          lfs: false         # skip Git LFS unless you store large assets that way
+
+      # Same Node setup as the test job to ensure consistent tooling
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: |
+            api/package-lock.json
+            package-lock.json
+
+      # Build and upload to Azure Static Web Apps.
+      # - app_location points to the frontend source folder
+      # - api_location points to the Azure Functions API folder
+      # - data_api_location is set empty to disable the swa-db-connections check
+      # - production_branch declares which branch is considered "production"
+      # - azure_static_web_apps_api_token is a deployment token stored as a repo secret
+      - name: Build & Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          action: upload
+          app_location: frontend
+          api_location: api
+          data_api_location: ""           # prevents automatic DB-Connections validation
+          production_branch: main          # marks main as the production branch
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+
+  # ----------------------------
+  # Close the PR preview environment when a PR is closed
+  # ----------------------------
+  close_pr_preview:
+    name: Close PR preview
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      # This signals Azure SWA to remove the temporary environment
+      # associated with the closed pull request.
+      - name: Close PR environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          action: close

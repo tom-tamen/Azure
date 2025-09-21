@@ -3,6 +3,7 @@
 
 ![vote\_saved](./media/site.png)
 
+Lien du site : https://icy-sky-0b8794103.2.azurestaticapps.net/
 
 ## Architecture de l'application
 ```mermaid
